@@ -60,7 +60,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Autoriser l'origine de votre frontend Next.js (ajoutez d'autres ports si nécessaire)
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:3333", "http://ged.mink67.com"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:3333", "http://ged.mink67.com", "https://apiged.mink67.com"));
         
         // Autoriser toutes les méthodes HTTP courantes
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

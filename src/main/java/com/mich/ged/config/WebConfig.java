@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Applique la règle sur toutes les routes (/api/...)
-                        .allowedOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3333", "http://ged.mink67.com") // URL de votre Next.js
+                        .allowedOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3333", "http://ged.mink67.com", "https://apiged.mink67.com") // URL de votre Next.js
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("Authorization", "Content-Disposition")
