@@ -12,7 +12,7 @@ services:
       POSTGRES_USER: app_user
       POSTGRES_PASSWORD: secretpassword
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -50,7 +50,7 @@ services:
     image: prom/prometheus:v2.53.0
     #network_node: host
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./infrastructure/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
@@ -59,7 +59,7 @@ services:
   grafana:
     image: grafana/grafana:11.1.0
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     depends_on:
@@ -73,14 +73,14 @@ services:
       xpack.security.enabled: "false"
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     ports:
-      - "9200:9200"
+      - "9202:9200"
     networks:
       - app-network
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.0
     ports:
-      - "5601:5601"
+      - "5606:5601"
     depends_on:
       - elasticsearch
     networks:
