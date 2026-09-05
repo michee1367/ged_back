@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # 1. BASE DE DONNÉES : POSTGRESQL
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: secretpassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # 2. APPLICATION SPRING BOOT
+  # ==========================================
+  #spring-app:
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfile
+  #  container_name: spring-boot-app
+  #  ports:
+  #    - "8080:8080"
+  #  environment:
+  #    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/app_db
+  #    SPRING_DATASOURCE_USERNAME: app_user
+  #    SPRING_DATASOURCE_PASSWORD: secretpassword
+  #    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus"
+  #    MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
+  #    APP_PORT: "8082"
+  #  depends_on:
+  #    postgres:
+  #      condition: service_healthy
+  #  networks:
+  #    - app-network
+  
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    #network_node: host
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - app-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  prom-data:
+  grafana-data:
+  es-data:
+  kibana-token:

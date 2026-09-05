@@ -1,0 +1,59 @@
+name: CI/CD Pipeline - Direct Build & Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  # ==========================================
+  # ÉTAPE 1 : BUILD MAVEN & TESTS (Validation)
+  # ==========================================
+  build-and-test:
+    name: Build & Test (Java 21)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Permissions sur mvnw
+        run: chmod +x mvnw
+
+      - name: Exécution des tests Maven
+        run: ./mvnw clean test -B
+
+  # ==========================================
+  # ÉTAPE 2 : DÉPLOIEMENT SSH & DOCKER COMPOSE
+  # ==========================================
+  deploy:
+    name: Deploy to VPS
+    needs: build-and-test # S'exécute uniquement si l'Étape 1 réussit
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Connexion SSH et compilation sur le serveur
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 1. Naviguer vers le dossier du projet sur le serveur
+            cd /chemin/vers/votre/projet
+
+            # 2. Récupérer le dernier code depuis GitHub
+            git pull origin main
+
+            # 3. Recompiler l'image Docker et relancer uniquement le conteneur Spring
+            docker compose up -d --build spring-app
+
+            # 4. Nettoyer les anciennes images orphelines
+            docker image prune -f

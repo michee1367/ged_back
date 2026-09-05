@@ -1,0 +1,1 @@
+ALTER TABLE public.dossiers  ALTER COLUMN agent_enregistreur_id TYPE BIGINT USING agent_enregistreur_id::BIGINT;

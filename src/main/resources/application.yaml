@@ -1,0 +1,93 @@
+spring:
+  application:
+    name: ged
+# 1. Configuration de la Base de Données PostgreSQL via Variables d'Environnement
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/app_db}
+    username: ${SPRING_DATASOURCE_USERNAME:app_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:secretpassword}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # Valide le schéma généré par Flyway sans le modifier
+    #show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+        jdbc:
+          time_zone: UTC
+        #format_sql: true
+
+  # 3. Migration automatique de la BDD avec Flyway
+  flyway:
+    enabled: true
+    #baseline-on-migrate: true # Permet de démarrer Flyway sur une BDD existante non vide
+    locations: classpath:db/migration
+    default-schema: public
+    schemas:
+      - public
+    baseline-on-migrate: true
+
+  # 4. Configuration de l'upload de fichiers (Multipart)
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB       # Taille maximale par fichier
+      max-request-size: 50MB    # Taille maximale de la requête HTTP globale
+
+# 5. Propriétés personnalisées du domaine (GED Storage)
+app:
+  storage:
+    location: ./storage/documents # Chemin d'accès local pour les documents enregistrés
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# 6. Configuration du serveur Web Tomcat
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus  # Expose le chemin /actuator/prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name:spring-boot-app} # Ajoute un tag global pratique
+
+ #logging:
+ # level:
+ #   org.flywaydb: DEBUG
+ #   org.springframework.boot.autoconfigure.flyway: DEBUG
+ #   com.mich.ged: DEBUG
+ #   org.springframework.security: DEBUG
+    #org.springframework.web: DEBUG
+    #org.hibernate.SQL: DEBUG
+    #org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    com.vectraxis: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.web.access: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n" # Remplacement par un format lisible en dev
+
