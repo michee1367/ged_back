@@ -50,7 +50,7 @@ springdoc:
 
 # 6. Configuration du serveur Web Tomcat
 server:
-  port: 8088
+  port: 8182
   servlet:
     context-path: /api/v1
 
