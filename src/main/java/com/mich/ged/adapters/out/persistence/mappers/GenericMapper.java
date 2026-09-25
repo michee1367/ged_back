@@ -81,6 +81,19 @@ public class GenericMapper {
 
         return entity;
     }
+    public ServiceEntity toEntity(ServiceModel domain, ServiceEntity entity) {
+        if (domain == null) return null;
+
+        if (entity == null) {
+            entity = new ServiceEntity();
+        }
+        
+        entity.setIdService(domain.idService());
+        entity.setNom(domain.nom());
+        entity.setCode(domain.code());
+
+        return entity;
+    }
 
     // ==========================================
     // UTILISATEUR
@@ -123,6 +136,27 @@ public class GenericMapper {
 
         return entity;
         
+    }
+
+    public UtilisateurEntity toEntity(UtilisateurModel domain, UtilisateurEntity entity) {
+        if (domain == null) return null;
+
+        if (entity == null) {
+            entity = new UtilisateurEntity();
+        }
+
+        entity.setIdUtilisateur(domain.idUtilisateur());
+        entity.setNom(domain.nom());
+        entity.setPrenom(domain.prenom());
+        entity.setPostNom(domain.postNom());
+        entity.setEmail(domain.email());
+        entity.setPhoneNumber(domain.phoneNumber());
+        entity.setMotDePasse(domain.motDePasse());
+        entity.setRoles(domain.roles());
+        entity.setActif(domain.actif());
+        entity.setService(toEntity(domain.service()));
+
+        return entity;
     }
 
     // ==========================================
@@ -252,6 +286,21 @@ public class GenericMapper {
                 entity.getHistoriques().add(hEntity);
             });
         }*/
+
+        return entity;
+    }
+    public DossierEntity toEntity(DossierModel domain, DossierEntity entity) {
+        if (domain == null) return null;
+
+        entity.setId(domain.idDossier());
+        entity.setNumero(domain.numeroDossier());
+        entity.setObjet(domain.objet());
+        entity.setEcheance(domain.echeance());
+        entity.setDateReception(domain.dateReception());
+        entity.setPriorite(domain.priorite());
+        entity.setStatut(domain.statutActuel());
+        entity.setAgentEnregistreur(toEntity(domain.agentResponsable()));
+        entity.setServiceDestinataire(toEntity(domain.serviceActuel()));
 
         return entity;
     }

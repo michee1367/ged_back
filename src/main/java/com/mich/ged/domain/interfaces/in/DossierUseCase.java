@@ -7,7 +7,9 @@ import com.mich.ged.domain.models.CommentaireModel;
 import com.mich.ged.domain.models.DocumentModel;
 import com.mich.ged.domain.models.DossierModel;
 import com.mich.ged.domain.models.HistoriqueTransmissionModel;
+import com.mich.ged.domain.models.Priorite;
 import com.mich.ged.domain.models.ReponseModel;
+import com.mich.ged.domain.models.StatutDossier;
 
 public interface DossierUseCase {
     
@@ -27,6 +29,8 @@ public interface DossierUseCase {
     DossierModel commenter(Long idDossier, String contenu);
     DossierModel repondre(Long idDossier, String contenu);
 
+    DossierModel modifier(Long idDossier, ModifierDossierCommand data);
+
     /**
      * RechercheDossierQuery
      */
@@ -34,6 +38,18 @@ public interface DossierUseCase {
         int page,
         int parPage
     ) {
+    }
+
+    /**
+     * 
+     */
+    public record ModifierDossierCommand(
+        String numeroDossier, 
+        String objet, 
+        Priorite priorite, 
+        StatutDossier statutActuel
+    ) {
+
     }
 
 

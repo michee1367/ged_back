@@ -24,15 +24,15 @@ public class GererUtilisateurImp implements GererUtilisateursUseCase {
 
     @Override
     public UtilisateurModel creerUtilisateur(CreerUtilisateurCommand command) {
-        ServiceModel service = serviceRepo.findById(command.idService()).orElseThrow(
+        /*ServiceModel service = serviceRepo.findById(command.idService()).orElseThrow(
             () -> new EntityNotFoundException("Le service n'exste pas")
-        );
+        );*/
+        ServiceModel service = null;
+        if(command.idService() != null) {
+            service = serviceRepo.findById(command.idService()).orElse(null);
+        }
 
         String hashPwd = passwordEncoder.encode(command.motDePasse());
-        System.out.println("###############################");
-        System.out.println(command.motDePasse());
-        System.out.println(hashPwd);
-        System.out.println("###############################");
         UtilisateurModel model = new UtilisateurModel(
             null,
             command.nom(),
@@ -49,17 +49,64 @@ public class GererUtilisateurImp implements GererUtilisateursUseCase {
         UtilisateurModel utilisateurSave = utilisateurRepo.save(model);
 
         return utilisateurSave;
-        //throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public UtilisateurModel modifier(Long idUtilisateur, ModifierUtilisateurCommand command) {
+
+        UtilisateurModel existant = utilisateurRepo.findById(idUtilisateur).orElseThrow(
+            () -> new EntityNotFoundException("L'utilisateur n'existe pas")
+        );
+
+        ServiceModel service = serviceRepo.findById(command.idService()).orElseThrow(
+            () -> new EntityNotFoundException("Le service n'existe pas")
+        );
+
+        String hashPwd = (command.motDePasse() != null && !command.motDePasse().isBlank())
+            ? passwordEncoder.encode(command.motDePasse())
+            : existant.motDePasse();
+
+        UtilisateurModel model = new UtilisateurModel(
+            idUtilisateur,
+            command.nom(),
+            command.postNom(),
+            command.prenom(),
+            command.phoneNumber(),
+            command.email(),
+            hashPwd,
+            command.roles() != null ? command.roles() : existant.roles(),
+            command.actif() != null ? command.actif() : existant.actif(),
+            service
+        );
+
+        return utilisateurRepo.save(model);
     }
 
     @Override
     public UtilisateurModel modifierStatut(Long idUtilisateur, boolean actif) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        UtilisateurModel existant = utilisateurRepo.findById(idUtilisateur).orElseThrow(
+            () -> new EntityNotFoundException("L'utilisateur n'existe pas")
+        );
+
+        UtilisateurModel model = new UtilisateurModel(
+            existant.idUtilisateur(),
+            existant.nom(),
+            existant.postNom(),
+            existant.prenom(),
+            existant.phoneNumber(),
+            existant.email(),
+            existant.motDePasse(),
+            existant.roles(),
+            actif,
+            existant.service()
+        );
+
+        return utilisateurRepo.save(model);
     }
 
     @Override
     public PagedResult<UtilisateurModel> listerParService(Long idService) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return utilisateurRepo.findAllByService(idService, 1, 10);
     }
 
     @Override

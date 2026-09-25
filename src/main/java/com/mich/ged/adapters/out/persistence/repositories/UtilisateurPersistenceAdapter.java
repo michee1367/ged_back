@@ -14,6 +14,8 @@ import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.interfaces.out.UtilisateurRepositoryPort;
 import com.mich.ged.domain.models.UtilisateurModel;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Component
 public class UtilisateurPersistenceAdapter implements UtilisateurRepositoryPort {
 
@@ -30,6 +32,17 @@ public class UtilisateurPersistenceAdapter implements UtilisateurRepositoryPort 
     @Transactional
     public UtilisateurModel save(UtilisateurModel utilisateur) {
         UtilisateurEntity entity = mapper.toEntity(utilisateur);
+        UtilisateurEntity saved = springDataRepository.save(entity);
+        return mapper.toDomain(saved);
+    }
+
+    @Override
+    @Transactional
+    public UtilisateurModel update(UtilisateurModel utilisateur) {
+        UtilisateurEntity entity = springDataRepository.findById(utilisateur.idUtilisateur())
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur n'existe pas"));
+        entity = mapper.toEntity(utilisateur, entity);
+
         UtilisateurEntity saved = springDataRepository.save(entity);
         return mapper.toDomain(saved);
     }
@@ -78,5 +91,34 @@ public class UtilisateurPersistenceAdapter implements UtilisateurRepositoryPort 
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResult<UtilisateurModel> findByAttachedUser(UtilisateurModel utilisateurModel, int page, int perPage) {
+        if (utilisateurModel.service() == null) {
+            return PagedResult.empty();
+        }
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), perPage);
+        Page<UtilisateurEntity> entityPage = springDataRepository.findByService_IdService(
+            utilisateurModel.service().idService(), pageable
+        );
+        return mapper.withEntityPage(entityPage, mapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResult<UtilisateurModel> findAllByService(Long idService, int page, int perPage) {
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), perPage);
+        Page<UtilisateurEntity> entityPage = springDataRepository.findByService_IdService(idService, pageable);
+        return mapper.withEntityPage(entityPage, mapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countByAttachedUser(UtilisateurModel utilisateurModel) {
+        if (utilisateurModel.service() == null) {
+            return 0;
+        }
+        return springDataRepository.countByService_IdService(utilisateurModel.service().idService());
+    }
 
 }

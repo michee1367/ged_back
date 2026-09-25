@@ -9,4 +9,7 @@ public record PagedResult<T>(
     int totalPages,
     boolean isLast
 ) {
+    public static <T> PagedResult<T> empty() {
+        return new PagedResult<>(List.of(), 1, 0, 0, 0, true);
+    }
 }

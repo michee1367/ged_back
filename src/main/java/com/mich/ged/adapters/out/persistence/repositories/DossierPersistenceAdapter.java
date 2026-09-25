@@ -14,8 +14,12 @@ import com.mich.ged.adapters.out.persistence.mappers.GenericMapper;
 import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.interfaces.out.DossierRepositoryPort;
 import com.mich.ged.domain.models.DossierModel;
+import com.mich.ged.domain.models.Priorite;
+import com.mich.ged.domain.models.StatutDossier;
 import com.mich.ged.domain.models.TypeRole;
 import com.mich.ged.domain.models.UtilisateurModel;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Component
 public class DossierPersistenceAdapter implements  DossierRepositoryPort {
@@ -120,6 +124,91 @@ public class DossierPersistenceAdapter implements  DossierRepositoryPort {
         );
 
         //throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @Transactional
+    public DossierModel update(DossierModel dossier) {
+        DossierEntity entity = springDataRepository.findById(dossier.idDossier()).orElseThrow(() -> new EntityNotFoundException("dossier n'existe pas"));
+        entity = mapper.toEntity(dossier, entity);
+        
+        DossierEntity savedEntity = springDataRepository.save(entity);
+        return mapper.toDomain(savedEntity);
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResult<DossierModel> findByUserByStatus(UtilisateurModel utilisateurModel, StatutDossier statutDossier, int page, int perPage) {
+        if (utilisateurModel.service() == null) {
+            return PagedResult.empty();
+        }
+        int pageIndex = Math.max(page - 1, 0);
+        Pageable pageable = PageRequest.of(pageIndex, perPage);
+
+        Page<DossierEntity> entityPage = springDataRepository.findDossiersParVisibiliteEtStatut(
+            utilisateurModel.idUtilisateur(),
+            utilisateurModel.service().idService(),
+            utilisateurModel.roles().contains(TypeRole.SECRETAIRE_BUREAU),
+            statutDossier.name(),
+            pageable
+        );
+
+        List<DossierModel> content = entityPage.getContent()
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+
+        return new PagedResult<>(
+                content,
+                entityPage.getNumber(),
+                entityPage.getSize(),
+                entityPage.getTotalElements(),
+                entityPage.getTotalPages(),
+                entityPage.isLast()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countParVisibilite(UtilisateurModel utilisateurModel) {
+        if (utilisateurModel.service() == null) {
+            return 0;
+        }
+        return springDataRepository.countDossiersParVisibilite(
+            utilisateurModel.idUtilisateur(),
+            utilisateurModel.service().idService(),
+            utilisateurModel.roles().contains(TypeRole.SECRETAIRE_BUREAU)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countParVisibiliteEtStatut(UtilisateurModel utilisateurModel, StatutDossier statutDossier) {
+        if (utilisateurModel.service() == null) {
+            return 0;
+        }
+        return springDataRepository.countDossiersParVisibiliteEtStatut(
+            utilisateurModel.idUtilisateur(),
+            utilisateurModel.service().idService(),
+            utilisateurModel.roles().contains(TypeRole.SECRETAIRE_BUREAU),
+            statutDossier.name()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countParVisibiliteEtPrioriteIn(UtilisateurModel utilisateurModel, List<Priorite> priorites) {
+        if (utilisateurModel.service() == null) {
+            return 0;
+        }
+        List<String> prioriteNames = priorites.stream().map(Priorite::name).toList();
+        return springDataRepository.countDossiersParVisibiliteEtPrioriteIn(
+            utilisateurModel.idUtilisateur(),
+            utilisateurModel.service().idService(),
+            utilisateurModel.roles().contains(TypeRole.SECRETAIRE_BUREAU),
+            prioriteNames
+        );
     }
     
 }

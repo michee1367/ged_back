@@ -3,7 +3,10 @@ package com.mich.ged.adapters.in;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase.CreerUtilisateurCommand;
+import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase.ModifierUtilisateurCommand;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,11 +65,40 @@ public class UtilisateurController {
         //throw new UnsupportedOperationException("Method non implementée");
     }
 
+    @Operation(summary="modifie les données d'un utilisateur")
+    @Parameter(name="Authorization", in = ParameterIn.HEADER, required=true)
+    @PutMapping("/{id}")
+    public ResponseEntity<UtilisateurModel> modifier(
+        @PathVariable(name="id") Long idUtilisateur,
+        @RequestBody ModifierUtilisateurCommand command  
+    ) {
+
+        UtilisateurModel model = gererUtilisateursUseCase.modifier(idUtilisateur, command);
+        return ResponseEntity.ok(model);
+    }
+
+    @Operation(summary="active/désactive un utilisateur")
+    @Parameter(name="Authorization", in = ParameterIn.HEADER, required=true)
+    @PatchMapping("/{id}/statut")
+    public ResponseEntity<UtilisateurModel> modifierStatut(
+        @PathVariable(name="id") Long idUtilisateur,
+        @RequestBody ModifierStatutDto data
+    ) {
+
+        UtilisateurModel model = gererUtilisateursUseCase.modifierStatut(idUtilisateur, data.actif());
+        return ResponseEntity.ok(model);
+    }
+
     /* -------------------------------------------------------- */
     //
     // DTO
     //
     /* --------------------------------------------------------- */
+
+    public record ModifierStatutDto(
+        boolean actif
+    ) {
+    }
      
     
 }

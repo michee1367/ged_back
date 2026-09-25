@@ -13,6 +13,8 @@ import com.mich.ged.adapters.out.persistence.mappers.GenericMapper;
 import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.interfaces.out.DocumentRepositoryPort;
 import com.mich.ged.domain.models.DocumentModel;
+import com.mich.ged.domain.models.TypeRole;
+import com.mich.ged.domain.models.UtilisateurModel;
 
 @Component
 public class DocumentPersistenceAdapter implements DocumentRepositoryPort {
@@ -49,5 +51,28 @@ public class DocumentPersistenceAdapter implements DocumentRepositoryPort {
 
         return mapper.withEntityPage(entityPage, mapper::toDomain);
         //throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResult<DocumentModel> findByUser(UtilisateurModel utilisateur, int page, int perPage) {
+        Pageable pageable = PageRequest.of(Math.max(page-1, 0), perPage);
+        Page<DocumentEntity> entityPage = springDataRepository.findByUser(utilisateur.idUtilisateur(), pageable);
+        return mapper.withEntityPage(entityPage, mapper::toDomain);
+
+        //throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countParVisibilite(UtilisateurModel utilisateur) {
+        if (utilisateur.service() == null) {
+            return 0;
+        }
+        return springDataRepository.countDocumentsParVisibilite(
+            utilisateur.idUtilisateur(),
+            utilisateur.service().idService(),
+            utilisateur.roles().contains(TypeRole.SECRETAIRE_BUREAU)
+        );
     }
 }

@@ -261,5 +261,28 @@ public class DossierService implements EnregistrerDossierUseCase, DossierUseCase
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public DossierModel modifier(Long idDossier, ModifierDossierCommand data) {
+        DossierModel dossier = this.un(idDossier);
+
+        DossierModel newDossier = new DossierModel(
+            idDossier, 
+            data.numeroDossier(), // numeroDossier, objet, priorite, statutActuel
+            data.objet(), 
+            dossier.dateReception(), 
+            dossier.echeance(), 
+            data.priorite(), 
+            data.statutActuel(), 
+            dossier.agentResponsable(), 
+            dossier.serviceActuel(), 
+            dossier.documents(), 
+            dossier.historiques()
+        );
+
+        return this.dossierRepo.update(newDossier);
+
+        //throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     
 }

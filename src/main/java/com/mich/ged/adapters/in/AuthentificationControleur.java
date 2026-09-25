@@ -1,5 +1,7 @@
 package com.mich.ged.adapters.in;
 
+import java.util.Set;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,11 +14,11 @@ import com.mich.ged.domain.interfaces.in.AuthentificationUseCase.ConnexionComman
 import com.mich.ged.domain.interfaces.in.AuthentificationUseCase.ConnexionReponse;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase.CreerUtilisateurCommand;
+import com.mich.ged.domain.models.TypeRole;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 @Tag(name="authentification", description="gerer l'authentification")
 @RequestMapping("/auth")
 @RestController
@@ -46,7 +48,20 @@ public class AuthentificationControleur {
         System.out.println(command.postNom());
         System.out.println(command.idService());
         System.out.println("##########################");
-        UtilisateurModel result = gererUtilisateursUseCase.creerUtilisateur(command);
+
+        CreerUtilisateurCommand newCommand = new CreerUtilisateurCommand(
+            command.idUtilisateur(),
+            command.nom(),
+            command.postNom(),
+            command.prenom(),
+            command.phoneNumber(),
+            command.email(),
+            command.motDePasse(),
+            Set.of(TypeRole.VISIT),
+            command.idService()
+        );
+        
+        UtilisateurModel result = gererUtilisateursUseCase.creerUtilisateur(newCommand);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
