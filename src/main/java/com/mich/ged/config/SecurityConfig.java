@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,15 +19,22 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.mich.ged.security.JwtAuthenticationFilter;
+import com.mich.ged.security.NonVisiteurAuthorizationManager;
 
 @Configuration
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final NonVisiteurAuthorizationManager nonVisiteurAuthorizationManager;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
+                          NonVisiteurAuthorizationManager nonVisiteurAuthorizationManager) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.nonVisiteurAuthorizationManager = nonVisiteurAuthorizationManager;
     }
+
+    // Chemins des services, dupliqués avec et sans le context-path (/api/v1)
+    private static final String[] SERVICES = {"/services", "/services/**", "/api/v1/services", "/api/v1/services/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,7 +55,14 @@ public class SecurityConfig {
                     "/actuator/**",
                     "/api/v1/actuator/**"
                 ).permitAll()
-                .anyRequest().authenticated()
+                // 2. Lecture de la liste des services : publique
+                .requestMatchers(HttpMethod.GET, SERVICES).permitAll()
+                // 3. Ecriture des services : reservee a l'administrateur
+                .requestMatchers(HttpMethod.POST, SERVICES).hasRole("ADMINISTRATEUR")
+                .requestMatchers(HttpMethod.PUT, SERVICES).hasRole("ADMINISTRATEUR")
+                .requestMatchers(HttpMethod.DELETE, SERVICES).hasRole("ADMINISTRATEUR")
+                // 4. Tout le reste : authentifie et non-VISIT
+                .anyRequest().access(nonVisiteurAuthorizationManager)
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

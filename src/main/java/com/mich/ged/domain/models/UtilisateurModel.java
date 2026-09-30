@@ -1,10 +1,11 @@
 package com.mich.ged.domain.models;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-/**
- * UtilisateurModel
- */
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public record UtilisateurModel(
     Long idUtilisateur,
     String nom,
@@ -12,7 +13,7 @@ public record UtilisateurModel(
     String prenom,
     String phoneNumber,
     String email,
-    String motDePasse,
+    @JsonIgnore String motDePasse,
     Set<TypeRole> roles,
     Boolean actif,
     ServiceModel service
@@ -20,5 +21,16 @@ public record UtilisateurModel(
     // Méthode utilitaire directe sur le Record
     public String nomComplet() {
         return prenom + " " + nom;
+    }
+
+    /**
+     * Format administratif : nom postnom prénom.
+     * Les parties nulles ou vides sont simplement omises.
+     */
+    public String nomCompletAvecPostNom() {
+        return Stream.of(nom, postNom, prenom)
+                .filter(part -> part != null && !part.isBlank())
+                .map(String::strip)
+                .collect(Collectors.joining(" "));
     }
 }

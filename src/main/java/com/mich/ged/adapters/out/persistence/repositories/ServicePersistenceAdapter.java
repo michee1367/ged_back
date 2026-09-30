@@ -58,7 +58,8 @@ public class ServicePersistenceAdapter implements ServiceRepositoryPort {
     @Override
     @Transactional(readOnly = true)
     public PagedResult<ServiceModel> findAll(int page, int perPage) {
-        Pageable pageable = PageRequest.of(page-1, perPage);
+        int pageIndex = Math.max(page - 1, 0);
+        Pageable pageable = PageRequest.of(pageIndex, perPage);
         Page<ServiceEntity> pageEntity = springDataRepository.findAll(pageable);
         
         return mapper.withEntityPage(pageEntity, mapper::toDomain);

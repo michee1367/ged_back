@@ -1,6 +1,9 @@
 package com.mich.ged.adapters.out.persistence.repositories;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +15,7 @@ import com.mich.ged.adapters.out.persistence.entities.UtilisateurEntity;
 import com.mich.ged.adapters.out.persistence.mappers.GenericMapper;
 import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.interfaces.out.UtilisateurRepositoryPort;
+import com.mich.ged.domain.models.UtilisateurBrefModel;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -119,6 +123,23 @@ public class UtilisateurPersistenceAdapter implements UtilisateurRepositoryPort 
             return 0;
         }
         return springDataRepository.countByService_IdService(utilisateurModel.service().idService());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UtilisateurBrefModel> findTousActifsIdEtNomComplet() {
+        return springDataRepository.findTousActifsIdEtNom().stream()
+                .map(projection -> new UtilisateurBrefModel(
+                        projection.getIdUtilisateur(),
+                        assemblageNomComplet(projection.getNom(), projection.getPostNom(), projection.getPrenom())))
+                .toList();
+    }
+
+    private String assemblageNomComplet(String nom, String postNom, String prenom) {
+        return Stream.of(nom, postNom, prenom)
+                .filter(part -> part != null && !part.isBlank())
+                .map(String::strip)
+                .collect(Collectors.joining(" "));
     }
 
 }

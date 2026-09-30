@@ -34,7 +34,7 @@ public class ServiceController {
     @Operation(summary="fourni la liste des services")
     public ResponseEntity<PagedResult<ServiceModel>> donnerTous(
         @RequestParam(name="page", defaultValue="1") int page, 
-        @RequestParam(name="per_page", defaultValue="1") int perPage 
+        @RequestParam(name="per_page", defaultValue="20") int perPage 
     ) {
 
         PagedResult<ServiceModel> result = serviceUseCase.lister(page, perPage);

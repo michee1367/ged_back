@@ -1,5 +1,7 @@
 package com.mich.ged.application;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase;
 import com.mich.ged.domain.interfaces.out.ServiceRepositoryPort;
 import com.mich.ged.domain.interfaces.out.UtilisateurRepositoryPort;
 import com.mich.ged.domain.models.ServiceModel;
+import com.mich.ged.domain.models.UtilisateurBrefModel;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -114,5 +117,10 @@ public class GererUtilisateurImp implements GererUtilisateursUseCase {
         return utilisateurRepo.findAll(page, perPage);
         //throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
+    @Override
+    public List<UtilisateurBrefModel> listerAnnuaire() {
+        return utilisateurRepo.findTousActifsIdEtNomComplet();
+    }
+
 }

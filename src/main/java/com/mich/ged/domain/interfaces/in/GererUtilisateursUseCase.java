@@ -1,9 +1,11 @@
 package com.mich.ged.domain.interfaces.in;
 
+import java.util.List;
 import java.util.Set;
 
 import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.models.TypeRole;
+import com.mich.ged.domain.models.UtilisateurBrefModel;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 public interface GererUtilisateursUseCase {
@@ -14,6 +16,12 @@ public interface GererUtilisateursUseCase {
     
     PagedResult<UtilisateurModel> listerParService(Long idService);
     PagedResult<UtilisateurModel> lister(int page, int perPage);
+
+    /**
+     * Annuaire : liste non paginée des utilisateurs actifs, réduite à l'id
+     * et au nom complet.
+     */
+    List<UtilisateurBrefModel> listerAnnuaire();
 
     /**
      * CreerUtilisateurCommand

@@ -1,5 +1,7 @@
 package com.mich.ged.adapters.in;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import com.mich.ged.domain.dto.PagedResult;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase.CreerUtilisateurCommand;
 import com.mich.ged.domain.interfaces.in.GererUtilisateursUseCase.ModifierUtilisateurCommand;
+import com.mich.ged.domain.models.UtilisateurBrefModel;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +53,18 @@ public class UtilisateurController {
         PagedResult<UtilisateurModel> result = gererUtilisateursUseCase.lister(page, perPage);
 
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary="fourni l'annuaire des utilisateurs (id + nom complet)")
+    @GetMapping("/annuaire")
+    public ResponseEntity<List<UtilisateurBrefDto>> donnerAnnuaire() {
+        List<UtilisateurBrefModel> result = gererUtilisateursUseCase.listerAnnuaire();
+
+        return ResponseEntity.ok(
+                result.stream()
+                        .map(model -> new UtilisateurBrefDto(model.idUtilisateur(), model.nomComplet()))
+                        .toList()
+        );
     }
 
     @Operation(summary="enregistre les utilisateurs")
@@ -94,6 +109,15 @@ public class UtilisateurController {
     // DTO
     //
     /* --------------------------------------------------------- */
+
+    /**
+     * Entree de l'annuaire : identifiant et nom complet uniquement.
+     */
+    public record UtilisateurBrefDto(
+        Long idUtilisateur,
+        String nomComplet
+    ) {
+    }
 
     public record ModifierStatutDto(
         boolean actif

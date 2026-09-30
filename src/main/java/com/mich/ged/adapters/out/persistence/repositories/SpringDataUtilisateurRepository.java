@@ -1,5 +1,6 @@
 package com.mich.ged.adapters.out.persistence.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -24,5 +25,16 @@ public interface SpringDataUtilisateurRepository extends JpaRepository<Utilisate
 
     @Query("Select u From UtilisateurEntity u Where u.email = :identifier Or u.phoneNumber = :identifier ")
     Optional<UtilisateurEntity> findByEmailOrPhoneNumber(@Param("identifier") String identifier);
+
+    @Query("""
+            Select u.idUtilisateur as idUtilisateur,
+                   u.nom as nom,
+                   u.postNom as postNom,
+                   u.prenom as prenom
+            From UtilisateurEntity u
+            Where u.actif = true
+            Order By u.nom
+            """)
+    List<UtilisateurProjectionIdNom> findTousActifsIdEtNom();
 
 }

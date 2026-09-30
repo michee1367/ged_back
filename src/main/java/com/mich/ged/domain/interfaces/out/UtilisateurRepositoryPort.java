@@ -1,7 +1,9 @@
 package com.mich.ged.domain.interfaces.out;
+import java.util.List;
 import java.util.Optional;
 
 import com.mich.ged.domain.dto.PagedResult;
+import com.mich.ged.domain.models.UtilisateurBrefModel;
 import com.mich.ged.domain.models.UtilisateurModel;
 
 public interface UtilisateurRepositoryPort {
@@ -17,5 +19,6 @@ public interface UtilisateurRepositoryPort {
     PagedResult<UtilisateurModel> findAllByService(Long idService, int page, int perPage);
     long countByAttachedUser(UtilisateurModel utilisateurModel);
 
+    List<UtilisateurBrefModel> findTousActifsIdEtNomComplet();
 
 }

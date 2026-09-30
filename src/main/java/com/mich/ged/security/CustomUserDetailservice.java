@@ -34,9 +34,11 @@ public class CustomUserDetailservice implements UserDetailsService {
         Collection<SimpleGrantedAuthority> authorities;
 
         if (user.roles() == null) {
-            authorities = List.of(new SimpleGrantedAuthority("User_ROLE") );
-        }else {
-            authorities = user.roles().stream().map((TypeRole role) -> new SimpleGrantedAuthority(role.name()+ "_ROLE")).toList();
+            authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            authorities = user.roles().stream()
+                    .map((TypeRole role) -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                    .toList();
         }
         
         return new User(
